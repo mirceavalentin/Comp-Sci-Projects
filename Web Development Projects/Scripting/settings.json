@@ -1,0 +1,15 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "Authors",
+            "database": "${workspaceFolder:webtech-206}/A3/database.db"
+        },
+        {
+            "driver": "SQLite",
+            "name": "Authors 2.0",
+            "database": "${workspaceFolder:webtech-206}/A3/database.db"
+        }
+    ]
+}
