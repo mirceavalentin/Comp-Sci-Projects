@@ -1,52 +1,34 @@
-# Necessary libraries
 import threading
 import socket
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host_port = ("143.47.184.219", 5378)
-sock.connect(host_port)
-print("Connected to the server.")
-
-# Take the username of the user and then form the first hello message
-username = input("Enter your username: ")
-first_hello = f"HELLO-FROM {username}\n"
-
-# Send the first hello message
-sock.send(first_hello.encode("utf-8"))
-
-# Receive the first message and print it
-message = sock.recv(4096).decode("utf-8")
-print(message)            
-
-def sending():
+def sending(sock):
     while True:
-         message = input("Type your command: ")
-         string_bytes = "f{message}".encode("utf-8")
-         bytes_len = len(string_bytes)
-         while num_bytes_to_send > 0:
-            num_bytes_to_send -= sock.send(string_bytes[bytes_len-num_bytes_to_send:])
+        command = ("Enter your command:")
+        sock.sendall(command.encode("utf-8"))
+        threading.Thread(target=sending, args=(sock, )).start()
 
+def receiving(sock):
+    while True:
+        received_message = sock.recv(4096).decode("utf-8")
+        print(received_message)
+        threading.Thread(target=receiving, args=(sock, )).start()
 
+def main():
 
-# To do: Implement threading and sending. Maybe use a while loop in this function.
+    while True:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        host_port = ("143.47.184.219", 5378)
+        sock.connect(host_port)
+        print("You've connected to the server.\n")
 
+        print("Hello! This is a simple chatroom. The avalabile commands are:\nLIST = This is a list containing all currently logged-in users.\nSEND <user> <msg> = This sends a message to a specific user.\n")
+        username = ("Please enter your username: ")
+        sock.sendall(f"HELLO-FROM {username}\n".encode("utf-8"))
+        message = sock.recv(4096).decode("utf-8")
+        print(message)
 
-# # Receiving function
-# def receive():
-#     while True:
-#         message = sock.recv(4096).decode("utf-8")
-#         print(message)
+        sending(sock)
+        receiving(sock)
 
-# # Sending function
-# def send():
-#     while True:
-#         message = input("Please send ur message: ")
-#         sock.send(message.encode("utf-8"))
-
-# # Threading for each of them
-# receive_thread = threading.Thread(target=receive)
-# receive_thread.start()
-
-# # Threading for each of them
-# send_thread = threading.Thread(target=send)
-# receive_thread.start()
+        if __name__ == '__main__':
+            main()
