@@ -1,34 +1,42 @@
 import threading
 import socket
 
-def sending(sock):
+def receive_from_server(sock):
     while True:
-        command = ("Enter your command:")
-        sock.sendall(command.encode("utf-8"))
-        threading.Thread(target=sending, args=(sock, )).start()
-
-def receiving(sock):
-    while True:
-        received_message = sock.recv(4096).decode("utf-8")
-        print(received_message)
-        threading.Thread(target=receiving, args=(sock, )).start()
-
-def main():
-
-    while True:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        host_port = ("143.47.184.219", 5378)
-        sock.connect(host_port)
-        print("You've connected to the server.\n")
-
-        print("Hello! This is a simple chatroom. The avalabile commands are:\nLIST = This is a list containing all currently logged-in users.\nSEND <user> <msg> = This sends a message to a specific user.\n")
-        username = ("Please enter your username: ")
-        sock.sendall(f"HELLO-FROM {username}\n".encode("utf-8"))
         message = sock.recv(4096).decode("utf-8")
+        if len(message) == 0:
+            print("Connection closed by server.")
+            exit(0)
         print(message)
 
-        sending(sock)
-        receiving(sock)
+def send_message_to_server(sock):
+    while True:
+        command = input("Avalabile commands:\nLIST\nSEND <user> <message>\nPlease input your command: ")
+        sock.sendall(f"{command}\n".encode("utf-8"))
 
-        if __name__ == '__main__':
-            main()
+def communicate_to_server(sock):
+    while True:
+        user_name = input("Please enter your name: ")
+        if user_name != '':
+            sock.sendall(f"HELLO-FROM {user_name}\n".encode("utf-8"))
+            break
+        else:
+            print("Username cannot be empty!")
+    receive_from_server_thread = threading.Thread(target=receive_from_server, args=(sock,))
+    receive_from_server_thread.start()
+    send_message_to_server_thread = threading.Thread(target=send_message_to_server, args=(sock,))
+    send_message_to_server_thread.start()
+
+def main():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        host_port = ("143.47.184.219", 5378)
+        sock.connect(host_port)
+        print(f"Succesfully connected to server.")
+    except:
+        print(f"Unable to connect to server.")
+
+    communicate_to_server(sock)
+
+if __name__ == '__main__':
+    main()
