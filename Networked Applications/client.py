@@ -70,7 +70,7 @@ def send_message_to_server(sock):
             print("Invalid command. Please try again.")
 
 def communicate_to_server(sock):
-    user_name = input("Please enter your name: ")                       # Get user username
+    user_name = input("Please enter your name: ")                      # Get user username
     if user_name != '':
         sock.send(f"HELLO-FROM {user_name}\n".encode("utf-8"))          # First handshake
     else:
@@ -83,7 +83,7 @@ def communicate_to_server(sock):
 def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)            # Define the sock connection
     try:
-        host_port = ("143.47.184.219", 5378)                            # teaching team server
+        host_port = ("127.0.0.1", 1234)                                 # our server
         sock.connect(host_port)
         print(f"Succesfully connected to server.\n")
     except:
