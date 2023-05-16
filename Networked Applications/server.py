@@ -42,6 +42,7 @@ def recieve_complete_message(client_socket):
             
 def handle_client(client_socket):
     user_list = {}
+    
     while True:
         try:
             message = recieve_complete_message(client_socket).strip()
@@ -125,34 +126,26 @@ def handle_client(client_socket):
             break
 
 def start_server():
+    max_nr_clients = 2
     """Start the chat server."""
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_socket.bind(("127.0.0.1", 1234))
-    server_socket.listen(65) # max 65 clients, >64 the minimum
     
     print("Chat server started.") 
 
     while True:
-        # Check if the maximum number of clients is reached
-        if len(clients) >= 65:
-            # Send "BUSY\n" message to the new client
-            client_socket, address = server_socket.accept()
+        server_socket.listen()
+        
+        client_socket, address = server_socket.accept()
+        
+        if len(clients) == max_nr_clients:
+        # Send "BUSY\n" message to the new client
             client_socket.send("BUSY\n".encode("utf-8"))
             client_socket.close()
-            continue
-        # Use select to check for incoming connections or data from clients
-        readable = select.select([server_socket] + list(clients.values()), [], [])[0]
-
-        for sock in readable:
-            if sock == server_socket:
-                # New connection, accept it and start a new thread to handle it
-                client_socket, address = server_socket.accept()
-                threading.Thread(target=handle_client, args=(client_socket,)).start()
-            else:
-                # Data available from a client, handle it in the same thread
-                handle_client(sock)
-
+        else:    
+            # New connection, accept it and start a new thread to handle it
+            threading.Thread(target=handle_client, args=(client_socket,)).start()
 
 if __name__ == "__main__":
     start_server()
