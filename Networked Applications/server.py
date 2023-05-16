@@ -73,7 +73,15 @@ def handle_client(client_socket):
             
 
             # Process the received message
-            if message.startswith("HELLO-FROM"):                
+            if message.startswith("HELLO-FROM"):
+                incoming_username = body
+
+                # Check if the username contains whitespace
+                if " " in incoming_username:
+                    client_socket.send("BAD-RQST-BODY\n".encode("utf-8"))
+                    remove_client(client_socket)
+                    break           
+                
                 handshake_msg = f"IN-USE\n"
                 incoming_username = body.split()[0].strip()
                 
@@ -126,6 +134,13 @@ def start_server():
     print("Chat server started.") 
 
     while True:
+        # Check if the maximum number of clients is reached
+        if len(clients) >= 65:
+            # Send "BUSY\n" message to the new client
+            client_socket, address = server_socket.accept()
+            client_socket.send("BUSY\n".encode("utf-8"))
+            client_socket.close()
+            continue
         # Use select to check for incoming connections or data from clients
         readable = select.select([server_socket] + list(clients.values()), [], [])[0]
 

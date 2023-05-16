@@ -21,10 +21,16 @@ def receive_from_server(sock):
                     print("User is not currently logged in.")
                 elif line == "BUSY\n":
                     print("Server is full.")
+                    sock.close()
+                    os._exit(0)
                 elif line == "BAD-RQST-HDR\n":
                     print("Please rewrite the message header.")
+                    sock.close()
+                    os._exit(0)
                 elif line == "BAD-RQST-BODY\n":
                     print("Please rewrite the message body.")
+                    sock.close()
+                    os._exit(0)
                 elif line == "IN-USE\n":
                     print("The name is already in use. Please choose another name:")
                     communicate_to_server(sock)
@@ -69,8 +75,9 @@ def send_message_to_server(sock):
         else:
             print("Invalid command. Please try again.")
 
+
 def communicate_to_server(sock):
-    user_name = input("Please enter your name: ")                      # Get user username
+    user_name = input("Please enter your name: ")                       # Get user username
     if user_name != '':
         sock.send(f"HELLO-FROM {user_name}\n".encode("utf-8"))          # First handshake
     else:
@@ -80,6 +87,7 @@ def communicate_to_server(sock):
     threading.Thread(target=receive_from_server, args=(sock, )).start() # Keep receiving messages even if not sending messages
     send_message_to_server(sock)                                        # Prompt user to send a message. If user doesn't send a message
                                                                         # messages incoming will still appear.
+
 def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)            # Define the sock connection
     try:
