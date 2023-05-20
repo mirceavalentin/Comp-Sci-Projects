@@ -118,7 +118,6 @@ def handle_client(client_socket):
 
 def start_server():
     max_nr_clients = 2   # set to 2 for testing purposes
-    """Start the chat server."""
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_socket.bind(("127.0.0.1", 1234))
